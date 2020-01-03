@@ -67,7 +67,7 @@ namespace CellularAutomaton
         }
     }
 
-    void Grid::OnMouseClick(unsigned int x, unsigned int y)
+    void Grid::ToggleCellState(unsigned int x, unsigned int y)
     {
         unsigned int gridX{ x - m_GridX - 1 };
         unsigned int gridY{ y - m_GridY - 1 };

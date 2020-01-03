@@ -21,7 +21,7 @@ namespace CellularAutomaton
         void RandomizeGrid();
         void ClearGrid();
         void Render(Renderer& renderer);
-        void OnMouseClick(unsigned int x, unsigned int y);
+        void ToggleCellState(unsigned int x, unsigned int y);
 
         bool IsCellAlive(unsigned int x, unsigned int y) const;
         EGridCellState GetCellState(unsigned int x, unsigned int y) const;
