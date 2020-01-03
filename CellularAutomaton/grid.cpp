@@ -17,7 +17,7 @@ namespace CellularAutomaton
 
     void Grid::ComputeNextGrid()
     {
-        std::vector<char> nextCells;
+        std::vector<EGridCellState> nextCells;
         nextCells.resize(m_GridWidth * m_GridHeight);
 
         for (unsigned int j = 0; j < m_GridHeight; ++j)
@@ -27,8 +27,8 @@ namespace CellularAutomaton
                 bool isCellAlive{ IsCellAlive(i, j) };
                 unsigned int neighborCount{ GetNeighborCount(i, j) };
 
-                bool nextState{ isCellAlive && neighborCount == 2 || neighborCount == 3 };
-                nextCells[i + j * m_GridWidth] = (nextState ? '*' : ' ');
+                EGridCellState nextState{ (isCellAlive && neighborCount == 2 || neighborCount == 3) ? EGridCellState::Alive : EGridCellState::Dead };
+                nextCells[i + j * m_GridWidth] = nextState;
             }
         }
 
@@ -40,17 +40,17 @@ namespace CellularAutomaton
         std::mt19937_64 randomDevice{ static_cast<unsigned int>(time(nullptr)) };
         std::uniform_int_distribution<int> dist{ 0, 1 };
 
-        for (char& c : m_Cells)
+        for (EGridCellState& c : m_Cells)
         {
-            c = dist(randomDevice) ? '*' : ' ';
+            c = dist(randomDevice) ? EGridCellState::Alive : EGridCellState::Dead;
         }
     }
 
     void Grid::ClearGrid()
     {
-        for (char& c : m_Cells)
+        for (EGridCellState& c : m_Cells)
         {
-            c = ' ';
+            c = EGridCellState::Dead;
         }
     }
 
@@ -61,7 +61,8 @@ namespace CellularAutomaton
         {
             for (unsigned int i = 0; i < m_GridWidth; ++i)
             {
-                renderer.DrawCharacter(i + m_GridX + 1, j + m_GridY + 1, GetCellState(i, j));
+                EGridCellState cellState{ GetCellState(i, j) };
+                renderer.DrawCharacter(i + m_GridX + 1, j + m_GridY + 1, cellState == EGridCellState::Alive ? '*' : ' ');
             }
         }
     }
@@ -72,19 +73,19 @@ namespace CellularAutomaton
         unsigned int gridY{ y - m_GridY - 1 };
         if (gridX < m_GridWidth && gridY < m_GridHeight)
         {
-            char clickedCell{ GetCellState(gridX, gridY) };
-            SetCellState(gridX, gridY, clickedCell == '*' ? ' ' : '*');
+            EGridCellState clickedCell{ GetCellState(gridX, gridY) };
+            SetCellState(gridX, gridY, clickedCell == EGridCellState::Alive ? EGridCellState::Dead : EGridCellState::Alive);
         }
     }
 
     bool Grid::IsCellAlive(unsigned int x, unsigned int y) const
     {
-        return (GetCellState(x, y) == '*');
+        return (GetCellState(x, y) == EGridCellState::Alive);
     }
 
-    char Grid::GetCellState(unsigned int x, unsigned int y) const
+    EGridCellState Grid::GetCellState(unsigned int x, unsigned int y) const
     {
-        char cellState{ ' ' };
+        EGridCellState cellState{ EGridCellState::Dead };
         if (x < m_GridWidth && y < m_GridHeight)
         {
             cellState = m_Cells[x + y * m_GridWidth];
@@ -92,7 +93,7 @@ namespace CellularAutomaton
         return cellState;
     }
 
-    void Grid::SetCellState(unsigned int x, unsigned int y, char newState)
+    void Grid::SetCellState(unsigned int x, unsigned int y, EGridCellState newState)
     {
         if (x < m_GridWidth && y < m_GridHeight)
         {

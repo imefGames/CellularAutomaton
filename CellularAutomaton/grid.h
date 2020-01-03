@@ -6,6 +6,12 @@ namespace CellularAutomaton
 {
     class Renderer;
 
+    enum class EGridCellState : unsigned char
+    {
+        Dead,
+        Alive
+    };
+
     class Grid
     {
     public:
@@ -18,13 +24,13 @@ namespace CellularAutomaton
         void OnMouseClick(unsigned int x, unsigned int y);
 
         bool IsCellAlive(unsigned int x, unsigned int y) const;
-        char GetCellState(unsigned int x, unsigned int y) const;
-        void SetCellState(unsigned int x, unsigned int y, char newState);
+        EGridCellState GetCellState(unsigned int x, unsigned int y) const;
+        void SetCellState(unsigned int x, unsigned int y, EGridCellState newState);
 
     private:
         unsigned int GetNeighborCount(unsigned int x, unsigned int y) const;
 
-        std::vector<char> m_Cells;
+        std::vector<EGridCellState> m_Cells;
         unsigned int m_GridX;
         unsigned int m_GridY;
         unsigned int m_GridWidth;
