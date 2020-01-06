@@ -37,7 +37,7 @@ int main()
         inputHandler.HandleEvents();
 
         auto currentTime{ std::chrono::high_resolution_clock::now() };
-        if (isAutomatonRunning && (forceGridComputation || std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastGridComputationTime) > gridComputationsPerSecond))
+        if (isAutomatonRunning && std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastGridComputationTime) > gridComputationsPerSecond || forceGridComputation)
         {
             cellularAutomatonGrid.ComputeNextGrid();
             lastGridComputationTime = std::chrono::high_resolution_clock::now();
