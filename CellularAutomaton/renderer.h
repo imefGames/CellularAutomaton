@@ -4,13 +4,25 @@
 
 namespace CellularAutomaton
 {
+    enum class EColor : unsigned char
+    {
+        Black,
+        Red,
+        Green,
+        Blue,
+        Yellow,
+        Pink,
+        Cyan,
+        White
+    };
+
     class Renderer
     {
     public:
         Renderer();
 
-        void DrawCharacter(unsigned int x, unsigned int y, char c);
-        void DrawRectangle(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+        void DrawCharacter(unsigned int x, unsigned int y, char c, EColor color = EColor::White);
+        void DrawRectangle(unsigned int x, unsigned int y, unsigned int width, unsigned int height, EColor color = EColor::White);
 
         void RenderFrame();
 
@@ -18,6 +30,7 @@ namespace CellularAutomaton
         struct CharacterInfo
         {
             char m_Character = ' ';
+            EColor m_Color = EColor::White;
         };
 
         CharacterInfo& GetCharacterInfoAtPosition(unsigned int x, unsigned int y);
