@@ -62,7 +62,7 @@ namespace CellularAutomaton
             for (unsigned int i = 0; i < m_GridWidth; ++i)
             {
                 EGridCellState cellState{ GetCellState(i, j) };
-                renderer.DrawCharacter(i + m_GridX + 1, j + m_GridY + 1, cellState == EGridCellState::Alive ? '*' : ' ');
+                renderer.DrawCharacter(i + m_GridX + 1, j + m_GridY + 1, cellState == EGridCellState::Alive ? 219 : ' ');
             }
         }
     }
