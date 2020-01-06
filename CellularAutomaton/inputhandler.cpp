@@ -6,6 +6,11 @@ namespace CellularAutomaton
 {
     static constexpr unsigned int K_INPUT_RECORD_BUFFER_SIZE{ 128 };
 
+    InputHandler::InputHandler()
+        : m_IsLeftButtonDown{ false }
+    {
+    }
+
     void InputHandler::RegisterButtonPressCommand(char requiredKey, const ButtonPressCommandFunction& command)
     {
         m_ButtonPressCommands.emplace_back(requiredKey, command);
@@ -46,14 +51,19 @@ namespace CellularAutomaton
                 case MOUSE_EVENT:
                 {
                     MOUSE_EVENT_RECORD& mouseEvent{ irInBuf[i].Event.MouseEvent };
-                    if (mouseEvent.dwEventFlags == 0 && mouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+                    bool isLeftButtonDown{ mouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED };
+                    if (m_IsLeftButtonDown != isLeftButtonDown)
                     {
-                        unsigned int clickX{ static_cast<unsigned int>(mouseEvent.dwMousePosition.X) };
-                        unsigned int clickY{ static_cast<unsigned int>(mouseEvent.dwMousePosition.Y) };
-
-                        for (const MouseClickCommandFunction& command : m_MouseClickCommands)
+                        m_IsLeftButtonDown = isLeftButtonDown;
+                        if (m_IsLeftButtonDown)
                         {
-                            command(clickX, clickY);
+                            unsigned int clickX{ static_cast<unsigned int>(mouseEvent.dwMousePosition.X) };
+                            unsigned int clickY{ static_cast<unsigned int>(mouseEvent.dwMousePosition.Y) };
+
+                            for (const MouseClickCommandFunction& command : m_MouseClickCommands)
+                            {
+                                command(clickX, clickY);
+                            }
                         }
                     }
                     break;

@@ -8,6 +8,8 @@ namespace CellularAutomaton
     class InputHandler
     {
     public:
+        InputHandler();
+
         using ButtonPressCommandFunction = std::function<void()>;
         using MouseClickCommandFunction = std::function<void(unsigned int, unsigned int)>;
 
@@ -33,6 +35,7 @@ namespace CellularAutomaton
 
         std::vector<ButtonPressCommand> m_ButtonPressCommands;
         std::vector<MouseClickCommandFunction> m_MouseClickCommands;
+        bool m_IsLeftButtonDown;
 
     };
 }
