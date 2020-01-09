@@ -1,9 +1,25 @@
 ﻿#include "grid.h"
+#include "gridsettings.h"
 #include "inputhandler.h"
 #include "renderer.h"
 
 #include <chrono>
 #include <thread>
+
+void SetupConwayGridSettings(CellularAutomaton::GridSettings& gridSettings)
+{
+    gridSettings.SetGridX(1);
+    gridSettings.SetGridY(1);
+    gridSettings.SetGridWidth(50);
+    gridSettings.SetGridHeight(20);
+
+    gridSettings.GetCellDescriptors().emplace_back(0, ' ', CellularAutomaton::EColor::White);
+    gridSettings.GetCellDescriptors().back().GetTransitions().emplace_back(1, 3, 1);
+
+    gridSettings.GetCellDescriptors().emplace_back(0, 219, CellularAutomaton::EColor::White);
+    gridSettings.GetCellDescriptors().back().GetTransitions().emplace_back(1, 2, 1);
+    gridSettings.GetCellDescriptors().back().GetTransitions().emplace_back(1, 3, 1);
+}
 
 int main()
 {
@@ -18,7 +34,10 @@ int main()
     std::chrono::microseconds minGridComputationsPerSecond{ 12500us };
     std::chrono::microseconds maxGridComputationsPerSecond{ 1600ms };
 
-    CellularAutomaton::Grid cellularAutomatonGrid{ 1, 2, 50, 20 };
+    CellularAutomaton::GridSettings gridSettings{};
+    SetupConwayGridSettings(gridSettings);
+
+    CellularAutomaton::Grid cellularAutomatonGrid{ gridSettings };
     CellularAutomaton::Renderer renderer;
     CellularAutomaton::InputHandler inputHandler;
 

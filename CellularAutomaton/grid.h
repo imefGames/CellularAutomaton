@@ -1,21 +1,16 @@
 #pragma once
 
+#include "gridsettings.h"
 #include <vector>
 
 namespace CellularAutomaton
 {
     class Renderer;
 
-    enum class EGridCellState : unsigned char
-    {
-        Dead,
-        Alive
-    };
-
     class Grid
     {
     public:
-        Grid(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+        Grid(const GridSettings& settings);
 
         void ComputeNextGrid();
         void RandomizeGrid();
@@ -23,14 +18,13 @@ namespace CellularAutomaton
         void Render(Renderer& renderer);
         void ToggleCellState(unsigned int x, unsigned int y);
 
-        bool IsCellAlive(unsigned int x, unsigned int y) const;
-        EGridCellState GetCellState(unsigned int x, unsigned int y) const;
-        void SetCellState(unsigned int x, unsigned int y, EGridCellState newState);
+        unsigned int GetNeighborCount(unsigned int x, unsigned int y, CellID m_SearchedCellID) const;
+        CellID GetCellState(unsigned int x, unsigned int y) const;
+        void SetCellState(unsigned int x, unsigned int y, CellID newState);
 
     private:
-        unsigned int GetNeighborCount(unsigned int x, unsigned int y) const;
-
-        std::vector<EGridCellState> m_Cells;
+        GridSettings m_Settings;
+        std::vector<CellID> m_Cells;
         unsigned int m_GridX;
         unsigned int m_GridY;
         unsigned int m_GridWidth;

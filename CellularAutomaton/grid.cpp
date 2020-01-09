@@ -6,29 +6,27 @@
 
 namespace CellularAutomaton
 {
-    Grid::Grid(unsigned int x, unsigned int y, unsigned int width, unsigned int height)
-        : m_GridX{ x }
-        , m_GridY{ y }
-        , m_GridWidth{ width }
-        , m_GridHeight{ height }
+    Grid::Grid(const GridSettings& settings)
+        : m_Settings{ settings }
+        , m_GridX{ settings.GetGridX() }
+        , m_GridY{ settings.GetGridX() }
+        , m_GridWidth{ settings.GetGridWidth() }
+        , m_GridHeight{ settings.GetGridHeight() }
     {
         m_Cells.resize(m_GridWidth * m_GridHeight);
     }
 
     void Grid::ComputeNextGrid()
     {
-        std::vector<EGridCellState> nextCells;
+        std::vector<CellID> nextCells;
         nextCells.resize(m_GridWidth * m_GridHeight);
 
         for (unsigned int j = 0; j < m_GridHeight; ++j)
         {
             for (unsigned int i = 0; i < m_GridWidth; ++i)
             {
-                bool isCellAlive{ IsCellAlive(i, j) };
-                unsigned int neighborCount{ GetNeighborCount(i, j) };
-
-                EGridCellState nextState{ (isCellAlive && neighborCount == 2 || neighborCount == 3) ? EGridCellState::Alive : EGridCellState::Dead };
-                nextCells[i + j * m_GridWidth] = nextState;
+                const CellDescriptor& cell{ m_Settings.FindCellDescriptor(GetCellState(i, j)) };
+                nextCells[i + j * m_GridWidth] =  cell.ComputeNextCellID(*this, i, j);
             }
         }
 
@@ -38,19 +36,19 @@ namespace CellularAutomaton
     void Grid::RandomizeGrid()
     {
         std::mt19937_64 randomDevice{ static_cast<unsigned int>(time(nullptr)) };
-        std::uniform_int_distribution<int> dist{ 0, 1 };
+        std::uniform_int_distribution<CellID> dist{ 0, static_cast<CellID>(m_Settings.GetCellDescriptors().size() - 1) };
 
-        for (EGridCellState& c : m_Cells)
+        for (CellID& c : m_Cells)
         {
-            c = dist(randomDevice) ? EGridCellState::Alive : EGridCellState::Dead;
+            c = dist(randomDevice);
         }
     }
 
     void Grid::ClearGrid()
     {
-        for (EGridCellState& c : m_Cells)
+        for (CellID& c : m_Cells)
         {
-            c = EGridCellState::Dead;
+            c = 0;
         }
     }
 
@@ -61,8 +59,8 @@ namespace CellularAutomaton
         {
             for (unsigned int i = 0; i < m_GridWidth; ++i)
             {
-                EGridCellState cellState{ GetCellState(i, j) };
-                renderer.DrawCharacter(i + m_GridX + 1, j + m_GridY + 1, cellState == EGridCellState::Alive ? 219 : ' ');
+                const CellDescriptor& cell{ m_Settings.FindCellDescriptor(GetCellState(i, j)) };
+                renderer.DrawCharacter(i + m_GridX + 1, j + m_GridY + 1, cell.GetCellDisplay(), cell.GetCellColor());
             }
         }
     }
@@ -73,19 +71,28 @@ namespace CellularAutomaton
         unsigned int gridY{ y - m_GridY - 1 };
         if (gridX < m_GridWidth && gridY < m_GridHeight)
         {
-            EGridCellState clickedCell{ GetCellState(gridX, gridY) };
-            SetCellState(gridX, gridY, clickedCell == EGridCellState::Alive ? EGridCellState::Dead : EGridCellState::Alive);
+            CellID clickedCell{ GetCellState(gridX, gridY) };
+            SetCellState(gridX, gridY, (clickedCell + 1) % m_Settings.GetCellDescriptors().size());
         }
     }
 
-    bool Grid::IsCellAlive(unsigned int x, unsigned int y) const
+    unsigned int Grid::GetNeighborCount(unsigned int x, unsigned int y, CellID searchedCellID) const
     {
-        return (GetCellState(x, y) == EGridCellState::Alive);
+        unsigned int neighborCount{ 0 };
+        if (GetCellState(x - 1, y - 1) == searchedCellID) { ++neighborCount; }
+        if (GetCellState(x - 1, y    ) == searchedCellID) { ++neighborCount; }
+        if (GetCellState(x - 1, y + 1) == searchedCellID) { ++neighborCount; }
+        if (GetCellState(x    , y - 1) == searchedCellID) { ++neighborCount; }
+        if (GetCellState(x    , y + 1) == searchedCellID) { ++neighborCount; }
+        if (GetCellState(x + 1, y - 1) == searchedCellID) { ++neighborCount; }
+        if (GetCellState(x + 1, y    ) == searchedCellID) { ++neighborCount; }
+        if (GetCellState(x + 1, y + 1) == searchedCellID) { ++neighborCount; }
+        return neighborCount;
     }
 
-    EGridCellState Grid::GetCellState(unsigned int x, unsigned int y) const
+    CellID Grid::GetCellState(unsigned int x, unsigned int y) const
     {
-        EGridCellState cellState{ EGridCellState::Dead };
+        CellID cellState{ 0 };
         if (x < m_GridWidth && y < m_GridHeight)
         {
             cellState = m_Cells[x + y * m_GridWidth];
@@ -93,25 +100,11 @@ namespace CellularAutomaton
         return cellState;
     }
 
-    void Grid::SetCellState(unsigned int x, unsigned int y, EGridCellState newState)
+    void Grid::SetCellState(unsigned int x, unsigned int y, CellID newState)
     {
         if (x < m_GridWidth && y < m_GridHeight)
         {
             m_Cells[x + y * m_GridWidth] = newState;
         }
-    }
-
-    unsigned int Grid::GetNeighborCount(unsigned int x, unsigned int y) const
-    {
-        unsigned int neighborCount{ 0 };
-        if (IsCellAlive(x - 1, y - 1)) { ++neighborCount; }
-        if (IsCellAlive(x - 1, y    )) { ++neighborCount; }
-        if (IsCellAlive(x - 1, y + 1)) { ++neighborCount; }
-        if (IsCellAlive(x    , y - 1)) { ++neighborCount; }
-        if (IsCellAlive(x    , y + 1)) { ++neighborCount; }
-        if (IsCellAlive(x + 1, y - 1)) { ++neighborCount; }
-        if (IsCellAlive(x + 1, y    )) { ++neighborCount; }
-        if (IsCellAlive(x + 1, y + 1)) { ++neighborCount; }
-        return neighborCount;
     }
 }
