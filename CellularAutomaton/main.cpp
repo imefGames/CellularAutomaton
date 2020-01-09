@@ -1,4 +1,5 @@
-﻿#include "grid.h"
+﻿#include "button.h"
+#include "grid.h"
 #include "gridsettings.h"
 #include "inputhandler.h"
 #include "renderer.h"
@@ -42,13 +43,24 @@ int main()
     CellularAutomaton::InputHandler inputHandler;
 
     auto lastGridComputationTime{ std::chrono::high_resolution_clock::now() };
-    inputHandler.RegisterButtonPressCommand('q', [&keepRunning]() { keepRunning = false; });
-    inputHandler.RegisterButtonPressCommand('r', [&cellularAutomatonGrid]() { cellularAutomatonGrid.RandomizeGrid(); });
-    inputHandler.RegisterButtonPressCommand('c', [&cellularAutomatonGrid]() { cellularAutomatonGrid.ClearGrid(); });
-    inputHandler.RegisterButtonPressCommand('s', [&forceGridComputation]() { forceGridComputation = true; });
-    inputHandler.RegisterButtonPressCommand(' ', [&isAutomatonRunning]() { isAutomatonRunning = !isAutomatonRunning; });
-    inputHandler.RegisterButtonPressCommand('+', [&gridComputationsPerSecond, maxGridComputationsPerSecond, stepGridComputationsPerSecond]() { if (gridComputationsPerSecond < maxGridComputationsPerSecond) { gridComputationsPerSecond *= stepGridComputationsPerSecond; } });
-    inputHandler.RegisterButtonPressCommand('-', [&gridComputationsPerSecond, minGridComputationsPerSecond, stepGridComputationsPerSecond]() { if (gridComputationsPerSecond > minGridComputationsPerSecond) { gridComputationsPerSecond /= stepGridComputationsPerSecond; } });
+
+    unsigned int buttonX{ gridSettings.GetGridX() + gridSettings.GetGridWidth() + 3 };
+    unsigned int buttonY{ gridSettings.GetGridY() };
+    std::vector<CellularAutomaton::Button> buttons;
+    buttons.emplace_back(buttonX, buttonY++, "Toggle Play", ' ', [&isAutomatonRunning]() { isAutomatonRunning = !isAutomatonRunning; });
+    buttons.emplace_back(buttonX, buttonY++, "Step", 's', [&forceGridComputation]() { forceGridComputation = true; });
+    buttons.emplace_back(buttonX, buttonY++, "Slower", '-', [&gridComputationsPerSecond, maxGridComputationsPerSecond, stepGridComputationsPerSecond]() { if (gridComputationsPerSecond < maxGridComputationsPerSecond) { gridComputationsPerSecond *= stepGridComputationsPerSecond; } });
+    buttons.emplace_back(buttonX, buttonY++, "Faster", '+', [&gridComputationsPerSecond, minGridComputationsPerSecond, stepGridComputationsPerSecond]() { if (gridComputationsPerSecond > minGridComputationsPerSecond) { gridComputationsPerSecond /= stepGridComputationsPerSecond; } });
+    buttonY++;
+    buttons.emplace_back(buttonX, buttonY++, "Randomize", 'r', [&cellularAutomatonGrid]() { cellularAutomatonGrid.RandomizeGrid(); });
+    buttons.emplace_back(buttonX, buttonY++, "Clear", 'c', [&cellularAutomatonGrid]() { cellularAutomatonGrid.ClearGrid(); });
+    buttonY++;
+    buttons.emplace_back(buttonX, buttonY++, "Exit", 'q', [&keepRunning]() { keepRunning = false; });
+    
+    for (CellularAutomaton::Button& b : buttons)
+    {
+        b.RegisterButton(inputHandler);
+    }
     inputHandler.RegisterMouseClickCommand([&cellularAutomatonGrid](unsigned int clickX, unsigned int clickY) { cellularAutomatonGrid.ToggleCellState(clickX, clickY); });
 
     while (keepRunning)
@@ -64,6 +76,11 @@ int main()
         }
 
         cellularAutomatonGrid.Render(renderer);
+        for (CellularAutomaton::Button& b : buttons)
+        {
+            b.Render(renderer);
+        }
+
         renderer.RenderFrame();
     }
 
