@@ -1,5 +1,8 @@
-Cell alive
-Cell dead
+GridPos 1 1
+GridSize 50 20
+
+Cell dead 32 White
+Cell alive 219 White
 
 DefaultTransition dead dead
 Transition dead alive 3 alive
