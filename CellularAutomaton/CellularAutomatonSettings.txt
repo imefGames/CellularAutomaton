@@ -1,0 +1,9 @@
+Cell alive
+Cell dead
+
+DefaultTransition dead dead
+Transition dead alive 3 alive
+
+DefaultTransition alive dead
+Transition alive alive 2 alive
+Transition alive alive 3 alive
