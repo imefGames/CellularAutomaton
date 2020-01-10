@@ -1,26 +1,15 @@
 ﻿#include "button.h"
 #include "grid.h"
 #include "gridsettings.h"
+#include "gridsettingscreator.h"
 #include "inputhandler.h"
 #include "renderer.h"
 
 #include <chrono>
+#include <string>
 #include <thread>
 
-void SetupConwayGridSettings(CellularAutomaton::GridSettings& gridSettings)
-{
-    gridSettings.SetGridX(1);
-    gridSettings.SetGridY(1);
-    gridSettings.SetGridWidth(50);
-    gridSettings.SetGridHeight(20);
-
-    gridSettings.GetCellDescriptors().emplace_back(0, ' ', CellularAutomaton::EColor::White);
-    gridSettings.GetCellDescriptors().back().GetTransitions().emplace_back(1, 3, 1);
-
-    gridSettings.GetCellDescriptors().emplace_back(0, 219, CellularAutomaton::EColor::White);
-    gridSettings.GetCellDescriptors().back().GetTransitions().emplace_back(1, 2, 1);
-    gridSettings.GetCellDescriptors().back().GetTransitions().emplace_back(1, 3, 1);
-}
+static const std::string K_CONFIG_FILE_PATH = "CellularAutomatonSettings.txt";
 
 int main()
 {
@@ -35,9 +24,7 @@ int main()
     std::chrono::microseconds minGridComputationsPerSecond{ 12500us };
     std::chrono::microseconds maxGridComputationsPerSecond{ 1600ms };
 
-    CellularAutomaton::GridSettings gridSettings{};
-    SetupConwayGridSettings(gridSettings);
-
+    CellularAutomaton::GridSettings gridSettings{ CellularAutomaton::GridSettingsCreator::CreateGridSettings(K_CONFIG_FILE_PATH) };
     CellularAutomaton::Grid cellularAutomatonGrid{ gridSettings };
     CellularAutomaton::Renderer renderer;
     CellularAutomaton::InputHandler inputHandler;
