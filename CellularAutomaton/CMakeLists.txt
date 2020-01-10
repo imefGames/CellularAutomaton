@@ -7,6 +7,7 @@ add_executable (CellularAutomaton "main.cpp"
                                   "gridsettings.h" "gridsettings.cpp"
                                   "gridsettingscreator.h" "gridsettingscreator.cpp"
                                   "renderer.h" "renderer.cpp"
+                                  "simulationwindow.h" "simulationwindow.cpp"
                                   )
 
 add_custom_command(TARGET CellularAutomaton POST_BUILD 
